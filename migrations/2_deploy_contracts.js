@@ -1,5 +1,8 @@
-var SimpleStorage = artifacts.require("./SimpleStorage.sol");
+var ContractDeployer = artifacts.require("./ContractDeployer.sol");
+var Utils = artifacts.require("./Utils.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(SimpleStorage);
+  deployer.deploy(Utils);
+  deployer.link(Utils, ContractDeployer);
+  deployer.deploy(ContractDeployer);
 };
