@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import SimpleStorageContract from "./contracts/ContractDeployer.json";
+import ContractDeployer from "./contracts/ContractDeployer.json";
+import ERC20Contract from "./contracts/ERC20Contract.json";
 import getWeb3 from "./getWeb3";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -15,7 +16,7 @@ const App = () => {
   const [web3, setWeb3] = useState(null);
   const [accounts, setAccounts] = useState(null);
   const [contract, setContract] = useState(null);
-  const [deployedContractAddress, setDeployedContractAddress] = useState(null);
+  const [deployedContractAddress, setDeployedContractAddress] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -28,9 +29,9 @@ const App = () => {
 
         // Get the contract instance.
         const networkId = await web3.eth.net.getId();
-        const deployedNetwork = SimpleStorageContract.networks[networkId];
+        const deployedNetwork = ContractDeployer.networks[networkId];
         const instance = new web3.eth.Contract(
-          SimpleStorageContract.abi,
+          ContractDeployer.abi,
           deployedNetwork && deployedNetwork.address
         );
 
@@ -54,7 +55,6 @@ const App = () => {
       contract.events
         .ContractDeployed()
         .on("data", (event) => {
-          console.log(`ContractDeployed event: ${event}`);
           setDeployedContractAddress(event.returnValues._contractAddress);
         })
         .on("error", (error) => console.log(error));
@@ -72,8 +72,11 @@ const App = () => {
       <Alert variant="primary">
         Your account: <b>{accounts}</b>
       </Alert>
-      <hr></hr>
+      <hr />
       {/*  Tabs */}
+      <Alert variant="primary">
+        Contract Deployer: <b>{contract && contract._address}</b>
+      </Alert>
       <Tabs
         defaultActiveKey="erc20"
         id="uncontrolled-tab-example"
