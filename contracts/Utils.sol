@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./ERC721/ERC721Contract.sol";
 import "./ERC20/ERC20Contract.sol";
+import "./ERC721/ERC721Contract.sol";
 
 library Utils {
     struct ContractsDeployed {

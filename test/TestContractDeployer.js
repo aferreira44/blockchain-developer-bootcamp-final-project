@@ -1,6 +1,6 @@
 const truffleAssert = require("truffle-assertions");
 const ContractDeployer = artifacts.require("./ContractDeployer.sol");
-const ERC20Contract = artifacts.require("./ERC721Contract.sol");
+const ERC20Contract = artifacts.require("./ERC20Contract.sol");
 const ERC721Contract = artifacts.require("./ERC721Contract.sol");
 const BN = web3.utils.BN;
 
