@@ -9,6 +9,6 @@ contract ERC20Contract is ERC20, Ownable {
         string memory name_,
         string memory symbol_
     ) ERC20(name_, symbol_) {
-        _mint(msg.sender, 1000); // TODO: Allow to set initial supply
+        _mint(msg.sender, 1000 * 10 ** 18); // TODO: Allow to set initial supply
     }
 }
