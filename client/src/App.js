@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import ContractDeployer from "./contracts/ContractDeployer.json";
 import ERC20Contract from "./contracts/ERC20Contract.json";
 import getWeb3 from "./getWeb3";
 import Col from "react-bootstrap/Col";
@@ -16,7 +15,6 @@ import "./App.css";
 const App = () => {
   const [web3, setWeb3] = useState(null);
   const [accounts, setAccounts] = useState(null);
-  const [contract, setContract] = useState(null);
   const [deployedContractAddress, setDeployedContractAddress] = useState("");
 
   useEffect(() => {
@@ -28,19 +26,10 @@ const App = () => {
         // Use web3 to get the user's accounts.
         const accounts = await web3.eth.getAccounts();
 
-        // Get the contract instance.
-        const networkId = await web3.eth.net.getId();
-        const deployedNetwork = ContractDeployer.networks[networkId];
-        const instance = new web3.eth.Contract(
-          ContractDeployer.abi,
-          deployedNetwork && deployedNetwork.address
-        );
-
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
         setWeb3(web3);
         setAccounts(accounts);
-        setContract(instance);
       } catch (error) {
         // Catch any errors for any of the above operations.
         alert(
@@ -49,17 +38,6 @@ const App = () => {
         console.error(error);
       }
     })();
-  });
-
-  useEffect(() => {
-    if (contract) {
-      contract.events
-        .ContractDeployed()
-        .on("data", (event) => {
-          setDeployedContractAddress(event.returnValues._contractAddress);
-        })
-        .on("error", (error) => console.log(error));
-    }
   });
 
   if (!web3) {
@@ -75,9 +53,6 @@ const App = () => {
       </Alert>
       <hr />
       {/*  Tabs */}
-      <Alert variant="primary">
-        Contract Deployer: <b>{contract && contract._address}</b>
-      </Alert>
       <Tabs
         defaultActiveKey="erc20"
         id="uncontrolled-tab-example"
@@ -86,18 +61,23 @@ const App = () => {
         {/*  ERC20 Tab */}
         <Tab eventKey="erc20" title="ERC20">
           <TokenParamsForm
+            deployedContractAddress={setDeployedContractAddress}
+            web3={web3}
             accounts={accounts}
-            contract={contract}
             contractType="ERC20"
           />
           <hr></hr>
-          <ERC20Interaction web3={web3} address={deployedContractAddress} />
+          <ERC20Interaction
+            accounts={accounts}
+            web3={web3}
+            address={deployedContractAddress}
+          />
         </Tab>
         {/*  ERC721 Tab */}
         <Tab eventKey="erc721" title="ERC721">
           <TokenParamsForm
+            web3={web3}
             accounts={accounts}
-            contract={contract}
             contractType="ERC721"
           />
         </Tab>
@@ -107,7 +87,7 @@ const App = () => {
 };
 
 const TokenParamsForm = (props) => {
-  const { contract, accounts, contractType } = props;
+  const { web3, accounts, contractType } = props;
   const [tokenName, setTokenName] = useState("");
   const [tokenSymbol, setTokenSymbol] = useState("");
 
@@ -120,9 +100,27 @@ const TokenParamsForm = (props) => {
   };
 
   const deployContract = async () => {
-    const tx = await contract.methods
-      .deployContract(contractType, tokenName, tokenSymbol)
-      .send({ from: accounts[0] });
+    switch (contractType) {
+      case "ERC20":
+        const erc20Contract = new web3.eth.Contract(ERC20Contract.abi);
+        erc20Contract
+          .deploy({
+            data: ERC20Contract.bytecode,
+            arguments: [tokenName, tokenSymbol],
+          })
+          .send({ from: accounts[0] })
+          .on("confirmation", () => {})
+          .then((newContractInstance) => {
+            props.deployedContractAddress(newContractInstance.options.address);
+          });
+        break;
+
+      case "ERC721":
+        break;
+
+      default:
+        break;
+    }
 
     // TODO: Add loading while waiting for transaction to be mined
     // TODO: Show notification when transaction is mined
@@ -167,7 +165,7 @@ const TokenParamsForm = (props) => {
 };
 
 const ERC20Interaction = (props) => {
-  const { web3, address } = props;
+  const { web3, accounts, address } = props;
   const [contractAddress, setContractAddress] = useState("");
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
@@ -241,6 +239,20 @@ const ERC20Interaction = (props) => {
     }
   };
 
+  const transfer = async () => {
+    const instance = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
+    instance.methods
+      .transfer(transferAddressTo, web3.utils.toWei(transferAmount))
+      .send({ from: accounts[0] })
+      .on("confirmation", () => {})
+      .then((response) => {
+        console.log("response :>> ", response);
+      })
+      .catch((error) => {
+        console.log("error :>> ", error);
+      });
+  };
+
   return (
     <>
       <h2>Contract Interaction</h2>
@@ -254,22 +266,36 @@ const ERC20Interaction = (props) => {
               onChange={onChangeContractAddress}
               placeholder="0x00000000000000000000"
             />
-            <Button variant="primary" onClick={loadContractData}>
-              Load
-            </Button>
+          </Form.Group>
+        </Row>
+        <Row>
+          <Button variant="primary" onClick={loadContractData}>
+            Load Contract
+          </Button>
+        </Row>
+        <Row className="m-3">
+          <Form.Group as={Col} controlId="formGridTokenName">
+            <Form.Label>Token Name: </Form.Label>
+
+            {name}
+          </Form.Group>
+          <Form.Group as={Col} controlId="formGridTokenName">
+            <Form.Label>Contract Owner: </Form.Label>
+
+            {owner}
+          </Form.Group>
+          <Form.Group as={Col} controlId="formGridTokenName">
+            <Form.Label>Total Supply: </Form.Label>
+            {web3.utils.fromWei(totalSupply, "ether")} {symbol}
           </Form.Group>
         </Row>
       </Form>
-      <p>Token Name: {name}</p>
-      <p>Contract Owner: {owner}</p>
-      <p>
-        Total Supply: {totalSupply} {symbol}
-      </p>
-
       <hr />
-
+      <h3>Get Balance</h3>
+      {/* 'balanceOf(address)': [Function: bound _createTxObject], */}
+      <hr />
       <h3>Transfer</h3>
-
+      {/* 'transfer(address,uint256)': [Function: bound _createTxObject], */}{" "}
       <Form>
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridAddressTo">
@@ -280,6 +306,9 @@ const ERC20Interaction = (props) => {
               onChange={onChangeTransferAddressTo}
               placeholder="0x00000000000000000000"
             />
+          </Form.Group>
+          <Form.Group as={Col} controlId="formGridAddressTo">
+            <Form.Label>Amount:</Form.Label>
             <InputGroup className="mb-3">
               <Form.Control
                 value={transferAmount}
@@ -290,17 +319,14 @@ const ERC20Interaction = (props) => {
               />
               <InputGroup.Text id="basic-addon2">{symbol}</InputGroup.Text>
             </InputGroup>
-            <Button variant="primary" onClick={loadContractData}>
-              Transfer {transferAmount} {symbol}
-            </Button>
           </Form.Group>
         </Row>
+        <Row>
+          <Button variant="primary" onClick={transfer}>
+            Transfer {transferAmount} {symbol}
+          </Button>
+        </Row>
       </Form>
-
-      {/* 'balanceOf(address)': [Function: bound _createTxObject],
-    
-    'transfer(address,uint256)': [Function: bound _createTxObject], */}
-      {/* Event Transfer */}
     </>
   );
 };
