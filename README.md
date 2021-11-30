@@ -2,7 +2,7 @@
 
 Bootcamp URL: https://courses.consensys.net/courses/blockchain-developer-bootcamp-registration-2021
 
-My Ethereum Address for certification: 0xf144132A549242D44A8edF58f1F7f324D5ADfe45
+### My Ethereum Address for certification: 0xf144132A549242D44A8edF58f1F7f324D5ADfe45
 
 ## What does the project do?
 
