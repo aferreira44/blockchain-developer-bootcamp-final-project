@@ -289,7 +289,7 @@ const ERC20Interaction = (props) => {
 
   const transfer = async () => {
     instance.methods
-      .transfer(transferAddressTo, web3.utils.toWei(transferAmount))
+      .transfer(transferAddressTo, web3.utils.toWei(String(transferAmount)))
       .send({ from: accounts[0] })
       .on("confirmation", () => {})
       .then((response) => {
@@ -302,7 +302,7 @@ const ERC20Interaction = (props) => {
 
   const mint = async () => {
     instance.methods
-      .mint(mintAccountTo, web3.utils.toWei(mintAmount))
+      .mint(mintAccountTo, web3.utils.toWei(String(mintAmount)))
       .send({ from: accounts[0] })
       .on("confirmation", () => {})
       .then((response) => {
