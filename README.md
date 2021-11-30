@@ -16,7 +16,17 @@ Here are the enabled functions of the smart contracts in this project:
 - Mint
 - Transfer
 
-The contract has been deployed to the Binance testnet.
+The contract has been deployed to the [Binance testnet](https://testnet.binance.org): 0x035D0CE14bD3E988f75B82853669AB8652C9110a.
+
+The owner account of deployed contract is: 0x6b65b09797B3Ab33Ec6E2Af0407E0a0836027f9f.
+
+To have access to the owner of the contract, you can use the following mnemonic:
+
+`learn fluid latin offer laugh bless giant rocket retire horror business road`
+
+## How to test
+
+Just run `truffle test` in the terminal.
 
 ## Next Steps
 
@@ -33,9 +43,9 @@ The contract has been deployed to the Binance testnet.
 
 You can access the frontend [here](https://blockchain-developer-bootcamp-final-project-sigma.vercel.app/).
 
-## Screencast
+<!-- ## Screencast
 
-<!-- To view a screencast [visit](https://drive.google.com/file/d/1bNsSN-SJnogjmFn4Rdxc0Ffk-mtSWdpP/view?usp=sharing) -->
+To view a screencast [visit](https://drive.google.com/file/d/1bNsSN-SJnogjmFn4Rdxc0Ffk-mtSWdpP/view?usp=sharing) -->
 
 :warning: **Make sure you are connecting a BSC testnet wallet**: Be very careful here!
 
