@@ -9,13 +9,16 @@ import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import Alert from "react-bootstrap/Alert";
 import InputGroup from "react-bootstrap/InputGroup";
+import Accordion from "react-bootstrap/Accordion";
 
 import "./App.css";
 
 const App = () => {
   const [web3, setWeb3] = useState(null);
   const [accounts, setAccounts] = useState(null);
-  const [deployedContractAddress, setDeployedContractAddress] = useState("");
+  const [deployedContractAddress, setDeployedContractAddress] = useState(
+    "0x035D0CE14bD3E988f75B82853669AB8652C9110a"
+  );
 
   useEffect(() => {
     (async () => {
@@ -52,36 +55,47 @@ const App = () => {
         Your account: <b>{accounts}</b>
       </Alert>
       <hr />
-      {/*  Tabs */}
-      <Tabs
-        defaultActiveKey="erc20"
-        id="uncontrolled-tab-example"
-        className="mb-3"
-      >
-        {/*  ERC20 Tab */}
-        <Tab eventKey="erc20" title="ERC20">
-          <TokenParamsForm
-            deployedContractAddress={setDeployedContractAddress}
-            web3={web3}
-            accounts={accounts}
-            contractType="ERC20"
-          />
-          <hr></hr>
-          <ERC20Interaction
-            accounts={accounts}
-            web3={web3}
-            address={deployedContractAddress}
-          />
-        </Tab>
-        {/*  ERC721 Tab */}
-        <Tab eventKey="erc721" title="ERC721">
-          <TokenParamsForm
-            web3={web3}
-            accounts={accounts}
-            contractType="ERC721"
-          />
-        </Tab>
-      </Tabs>
+      <Accordion defaultActiveKey="1">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>Deploy a new contract</Accordion.Header>
+          <Accordion.Body>
+            {/*  Tabs */}
+            <Tabs
+              defaultActiveKey="erc20"
+              id="uncontrolled-tab-example"
+              className="mb-3"
+            >
+              {/*  ERC20 Tab */}
+              <Tab eventKey="erc20" title="ERC20">
+                <TokenParamsForm
+                  deployedContractAddress={setDeployedContractAddress}
+                  web3={web3}
+                  accounts={accounts}
+                  contractType="ERC20"
+                />
+              </Tab>
+              {/*  ERC721 Tab */}
+              <Tab eventKey="erc721" title="ERC721">
+                <TokenParamsForm
+                  web3={web3}
+                  accounts={accounts}
+                  contractType="ERC721"
+                />
+              </Tab>
+            </Tabs>
+          </Accordion.Body>
+        </Accordion.Item>
+        <Accordion.Item eventKey="1">
+          <Accordion.Header>Contract Interaction</Accordion.Header>
+          <Accordion.Body>
+            <ERC20Interaction
+              accounts={accounts}
+              web3={web3}
+              address={deployedContractAddress}
+            />
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
     </div>
   );
 };
@@ -171,7 +185,7 @@ const ERC20Interaction = (props) => {
   const [owner, setOwner] = useState("");
   const [totalSupply, setTotalSupply] = useState("");
   const [symbol, setSymbol] = useState("");
-  const [transferAddressTo, setTransferAddressTo] = useState("");
+  const [transferAddressTo, setTransferAddressTo] = useState("0x87f98Ba5bffB37Cc8cEA5b1A225D90308cDF5f59");
   const [transferAmount, setTransferAmount] = useState("");
 
   useEffect(() => {
@@ -255,7 +269,6 @@ const ERC20Interaction = (props) => {
 
   return (
     <>
-      <h2>Contract Interaction</h2>
       <Form>
         <Row className="mb-3">
           <Form.Group as={Col} controlId="formGridContractAddress">
@@ -291,42 +304,63 @@ const ERC20Interaction = (props) => {
         </Row>
       </Form>
       <hr />
-      <h3>Get Balance</h3>
-      {/* 'balanceOf(address)': [Function: bound _createTxObject], */}
-      <hr />
-      <h3>Transfer</h3>
-      {/* 'transfer(address,uint256)': [Function: bound _createTxObject], */}{" "}
-      <Form>
-        <Row className="mb-3">
-          <Form.Group as={Col} controlId="formGridAddressTo">
-            <Form.Label>Address To:</Form.Label>
+      {/*  Tabs */}
+      <Tabs
+        defaultActiveKey="getBalance"
+        id="uncontrolled-tab-example"
+        className="mb-3"
+      >
+        <Tab eventKey="getBalance" title="Get Balance">
+          <h3>Get Balance</h3>
+          {/* 'balanceOf(address)': [Function: bound _createTxObject], */}
+          {/* <TokenParamsForm
+            deployedContractAddress={setDeployedContractAddress}
+            web3={web3}
+            accounts={accounts}
+            contractType="ERC20"
+          /> */}
+        </Tab>
+        <Tab eventKey="transfer" title="Transfer">
+          <Form>
+            <Row className="mb-3">
+              <Form.Group as={Col} controlId="formGridAddressTo">
+                <Form.Label>Address To:</Form.Label>
 
-            <Form.Control
-              value={transferAddressTo}
-              onChange={onChangeTransferAddressTo}
-              placeholder="0x00000000000000000000"
-            />
-          </Form.Group>
-          <Form.Group as={Col} controlId="formGridAddressTo">
-            <Form.Label>Amount:</Form.Label>
-            <InputGroup className="mb-3">
-              <Form.Control
-                value={transferAmount}
-                onChange={onChangeTransferAmount}
-                placeholder={"0.01 " + symbol}
-                aria-label="Recipient's username"
-                aria-describedby="basic-addon2"
-              />
-              <InputGroup.Text id="basic-addon2">{symbol}</InputGroup.Text>
-            </InputGroup>
-          </Form.Group>
-        </Row>
-        <Row>
-          <Button variant="primary" onClick={transfer}>
-            Transfer {transferAmount} {symbol}
-          </Button>
-        </Row>
-      </Form>
+                <Form.Control
+                  value={transferAddressTo}
+                  onChange={onChangeTransferAddressTo}
+                  placeholder="0x00000000000000000000"
+                />
+              </Form.Group>
+              <Form.Group as={Col} controlId="formGridAddressTo">
+                <Form.Label>Amount:</Form.Label>
+                <InputGroup className="mb-3">
+                  <Form.Control
+                    value={transferAmount}
+                    onChange={onChangeTransferAmount}
+                    placeholder={"0.01 " + symbol}
+                    aria-label="Recipient's username"
+                    aria-describedby="basic-addon2"
+                  />
+                  <InputGroup.Text id="basic-addon2">{symbol}</InputGroup.Text>
+                </InputGroup>
+              </Form.Group>
+            </Row>
+            <Row>
+              <Button variant="primary" onClick={transfer}>
+                Transfer {transferAmount} {symbol}
+              </Button>
+            </Row>
+          </Form>
+        </Tab>
+        <Tab eventKey="mint" title="Mint">
+          {/* <TokenParamsForm
+            web3={web3}
+            accounts={accounts}
+            contractType="ERC721"
+          /> */}
+        </Tab>
+      </Tabs>{" "}
     </>
   );
 };
