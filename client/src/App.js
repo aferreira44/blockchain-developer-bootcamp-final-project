@@ -43,13 +43,17 @@ const App = () => {
     })();
   });
 
+  window.ethereum.on("accountsChanged", (accounts) => {
+    setAccounts(accounts);
+  });
+
   if (!web3) {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
   return (
     <div className="App">
       <h1>Contract Deployer</h1>
-      <p>Here you can deploy your smart contract with just one click.</p>
+      <p>Here you can deploy and interact with your smart contract with just one click.</p>
       {/*  Your account: */}
       <Alert variant="primary">
         Your account: <b>{accounts}</b>
@@ -138,19 +142,13 @@ const TokenParamsForm = (props) => {
 
     // TODO: Add loading while waiting for transaction to be mined
     // TODO: Show notification when transaction is mined
-
-    // Get the value from the contract to prove it worked.
-    // const response = await contract.methods.get().call();
-
-    // Update state with the result.
-    // this.setState({ storageValue: response });
   };
 
   return (
     <>
       <Form>
         <Row className="mb-3">
-          <Form.Group as={Col} controlId="formGridName">
+          <Form.Group as={Col}>
             <Form.Label>Name</Form.Label>
 
             <Form.Control
@@ -160,7 +158,7 @@ const TokenParamsForm = (props) => {
             />
           </Form.Group>
 
-          <Form.Group as={Col} controlId="formGridSymbol">
+          <Form.Group as={Col}>
             <Form.Label>Symbol</Form.Label>
             <Form.Control
               value={tokenSymbol}
@@ -185,8 +183,20 @@ const ERC20Interaction = (props) => {
   const [owner, setOwner] = useState("");
   const [totalSupply, setTotalSupply] = useState("");
   const [symbol, setSymbol] = useState("");
-  const [transferAddressTo, setTransferAddressTo] = useState("0x87f98Ba5bffB37Cc8cEA5b1A225D90308cDF5f59");
-  const [transferAmount, setTransferAmount] = useState("");
+  const [transferAddressTo, setTransferAddressTo] = useState(
+    "0x87f98Ba5bffB37Cc8cEA5b1A225D90308cDF5f59"
+  );
+  const [transferAmount, setTransferAmount] = useState(100);
+  const [balanceAccount, setBalanceAccount] = useState(
+    "0x6b65b09797B3Ab33Ec6E2Af0407E0a0836027f9f"
+  );
+  const [balanceValue, setBalanceValue] = useState("");
+  const [mintAccountTo, setMintAccountTo] = useState(
+    "0x87f98Ba5bffB37Cc8cEA5b1A225D90308cDF5f59"
+  );
+  const [mintAmount, setMintAmount] = useState(100);
+
+  const instance = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
 
   useEffect(() => {
     setContractAddress(address);
@@ -204,12 +214,23 @@ const ERC20Interaction = (props) => {
     setTransferAddressTo(e.target.value);
   };
 
+  const onChangeMintAccountTo = (e) => {
+    setMintAccountTo(e.target.value);
+  };
+
+  const onChangeMintAmount = (e) => {
+    setMintAmount(e.target.value);
+  };
+
   const onChangeTransferAmount = (e) => {
     setTransferAmount(e.target.value);
   };
 
+  const onChangeBalanceAddress = (e) => {
+    setBalanceAccount(e.target.value);
+  };
+
   const loadContractData = () => {
-    const instance = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
     if (instance._address) {
       instance.methods
         .name()
@@ -253,10 +274,35 @@ const ERC20Interaction = (props) => {
     }
   };
 
+  const balanceOf = async () => {
+    instance.methods
+      .balanceOf(balanceAccount)
+      .call()
+      .then((value) => {
+        console.log("value :>> ", web3.utils.fromWei(value, "ether"));
+        setBalanceValue(web3.utils.fromWei(value, "ether"));
+      })
+      .catch((error) => {
+        console.log("error :>> ", error);
+      });
+  };
+
   const transfer = async () => {
-    const instance = new web3.eth.Contract(ERC20Contract.abi, contractAddress);
     instance.methods
       .transfer(transferAddressTo, web3.utils.toWei(transferAmount))
+      .send({ from: accounts[0] })
+      .on("confirmation", () => {})
+      .then((response) => {
+        console.log("response :>> ", response);
+      })
+      .catch((error) => {
+        console.log("error :>> ", error);
+      });
+  };
+
+  const mint = async () => {
+    instance.methods
+      .mint(mintAccountTo, web3.utils.toWei(mintAmount))
       .send({ from: accounts[0] })
       .on("confirmation", () => {})
       .then((response) => {
@@ -271,7 +317,7 @@ const ERC20Interaction = (props) => {
     <>
       <Form>
         <Row className="mb-3">
-          <Form.Group as={Col} controlId="formGridContractAddress">
+          <Form.Group as={Col}>
             <Form.Label>Contract Address</Form.Label>
 
             <Form.Control
@@ -287,17 +333,17 @@ const ERC20Interaction = (props) => {
           </Button>
         </Row>
         <Row className="m-3">
-          <Form.Group as={Col} controlId="formGridTokenName">
+          <Form.Group as={Col}>
             <Form.Label>Token Name: </Form.Label>
 
             {name}
           </Form.Group>
-          <Form.Group as={Col} controlId="formGridTokenName">
+          <Form.Group as={Col}>
             <Form.Label>Contract Owner: </Form.Label>
 
             {owner}
           </Form.Group>
-          <Form.Group as={Col} controlId="formGridTokenName">
+          <Form.Group as={Col}>
             <Form.Label>Total Supply: </Form.Label>
             {web3.utils.fromWei(totalSupply, "ether")} {symbol}
           </Form.Group>
@@ -311,19 +357,34 @@ const ERC20Interaction = (props) => {
         className="mb-3"
       >
         <Tab eventKey="getBalance" title="Get Balance">
-          <h3>Get Balance</h3>
           {/* 'balanceOf(address)': [Function: bound _createTxObject], */}
-          {/* <TokenParamsForm
-            deployedContractAddress={setDeployedContractAddress}
-            web3={web3}
-            accounts={accounts}
-            contractType="ERC20"
-          /> */}
+          <Form>
+            <Row className="mb-3">
+              <Form.Group as={Col}>
+                <Form.Label>Account:</Form.Label>
+
+                <Form.Control
+                  value={balanceAccount}
+                  onChange={onChangeBalanceAddress}
+                  placeholder="0x00000000000000000000"
+                />
+              </Form.Group>
+              <Form.Group as={Col}>
+                <Form.Label>Balance:</Form.Label>
+                {balanceValue} {symbol}
+              </Form.Group>
+            </Row>
+            <Row>
+              <Button variant="primary" onClick={balanceOf}>
+                Get Balance
+              </Button>
+            </Row>
+          </Form>
         </Tab>
         <Tab eventKey="transfer" title="Transfer">
           <Form>
             <Row className="mb-3">
-              <Form.Group as={Col} controlId="formGridAddressTo">
+              <Form.Group as={Col}>
                 <Form.Label>Address To:</Form.Label>
 
                 <Form.Control
@@ -332,7 +393,7 @@ const ERC20Interaction = (props) => {
                   placeholder="0x00000000000000000000"
                 />
               </Form.Group>
-              <Form.Group as={Col} controlId="formGridAddressTo">
+              <Form.Group as={Col}>
                 <Form.Label>Amount:</Form.Label>
                 <InputGroup className="mb-3">
                   <Form.Control
@@ -354,11 +415,37 @@ const ERC20Interaction = (props) => {
           </Form>
         </Tab>
         <Tab eventKey="mint" title="Mint">
-          {/* <TokenParamsForm
-            web3={web3}
-            accounts={accounts}
-            contractType="ERC721"
-          /> */}
+          <Form>
+            <Row className="mb-3">
+              <Form.Group as={Col}>
+                <Form.Label>Address To:</Form.Label>
+
+                <Form.Control
+                  value={mintAccountTo}
+                  onChange={onChangeMintAccountTo}
+                  placeholder="0x00000000000000000000"
+                />
+              </Form.Group>
+              <Form.Group as={Col}>
+                <Form.Label>Amount:</Form.Label>
+                <InputGroup className="mb-3">
+                  <Form.Control
+                    value={mintAmount}
+                    onChange={onChangeMintAmount}
+                    placeholder={"0.01 " + symbol}
+                    aria-label="Recipient's username"
+                    aria-describedby="basic-addon2"
+                  />
+                  <InputGroup.Text id="basic-addon2">{symbol}</InputGroup.Text>
+                </InputGroup>
+              </Form.Group>
+            </Row>
+            <Row>
+              <Button variant="primary" onClick={mint}>
+                Mint {mintAmount} {symbol}
+              </Button>
+            </Row>
+          </Form>
         </Tab>
       </Tabs>{" "}
     </>
