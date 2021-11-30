@@ -16,11 +16,15 @@ Here are the enabled functions of the smart contracts in this project:
 - Mint
 - Transfer
 
-The contract has been deployed to the [Binance testnet](https://testnet.binance.org): 0x035D0CE14bD3E988f75B82853669AB8652C9110a.
+## Deployed contract
 
-The owner account of deployed contract is: 0x6b65b09797B3Ab33Ec6E2Af0407E0a0836027f9f.
+If you wnat to use the smart contract already deployed and loaded when open the frontend, read the following section.
 
-To have access to the owner of the contract, you can use the following mnemonic:
+- The contract has been deployed to the [Binance testnet](https://testnet.binance.org): 0x035D0CE14bD3E988f75B82853669AB8652C9110a.
+- The owner account of deployed contract is: 0x6b65b09797B3Ab33Ec6E2Af0407E0a0836027f9f.
+- To have access to the owner of the contract, you can use the following mnemonic:
+
+:warning: **Don't use this mnemonic for other projects or in a production network**
 
 `learn fluid latin offer laugh bless giant rocket retire horror business road`
 
