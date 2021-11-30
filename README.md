@@ -43,9 +43,9 @@ Just run `truffle test` in the terminal.
 
 You can access the frontend [here](https://blockchain-developer-bootcamp-final-project-sigma.vercel.app/).
 
-<!-- ## Screencast
+## Screencast
 
-To view a screencast [visit](https://drive.google.com/file/d/1bNsSN-SJnogjmFn4Rdxc0Ffk-mtSWdpP/view?usp=sharing) -->
+To view a screencast [visit](https://drive.google.com/file/d/1kSWZ2Ka_Qe7pSDcqXzg65j0RPiNgYP8k/view?usp=sharing)
 
 :warning: **Make sure you are connecting a BSC testnet wallet**: Be very careful here!
 
