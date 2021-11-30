@@ -11,7 +11,7 @@ contract("ERC20Contract", (accounts) => {
     symbol: "$ERC20",
   };
 
-  before(async function () {
+  beforeEach(async function () {
     // runs once before the first test in this block
     contractERC20Instance = await ERC20Contract.new(
       params.name,
@@ -45,7 +45,36 @@ contract("ERC20Contract", (accounts) => {
       "Owner account is not the contract owner"
     );
   });
-  xit("...should be able to transfer the ownership", async () => {});
-  xit("...should be able to renounce the ownership", async () => {});
-  // Other ERC20 functions (mint, transfer, etc)
+  it("...should has 1000 tokens as total supply", async () => {
+    assert.equal(
+      web3.utils.fromWei(await contractERC20Instance.totalSupply(), "ether"),
+      1000,
+      "Total supply is not 1000"
+    );
+  });
+  it("...should be able to mint tokens", async () => {
+    const amount = "100";
+    await contractERC20Instance.mint(accounts[1], web3.utils.toWei(amount), {
+      from: owner,
+    });
+
+    assert.equal(
+      web3.utils.fromWei(await contractERC20Instance.balanceOf(accounts[1]), "ether"),
+      amount,
+      "The amount is not equal to 100"
+    );
+  });
+  it("...should be able to transfer tokens", async () => {
+    const amount = "100";
+
+    await contractERC20Instance.transfer(accounts[1], web3.utils.toWei(amount), {
+      from: owner,
+    });
+
+    assert.equal(
+      web3.utils.fromWei(await contractERC20Instance.balanceOf(accounts[1]), "ether"),
+      amount,
+      "The amount is not equal to 100"
+    );
+  });
 });

@@ -45,7 +45,7 @@ contract("ERC721Contract", (accounts) => {
       "Owner account is not the contract owner"
     );
   });
-  xit("...should be able to transfer the ownership", async () => {});
-  xit("...should be able to renounce the ownership", async () => {});
+  // xit("...should be able to transfer the ownership", async () => {});
+  // xit("...should be able to renounce the ownership", async () => {});
   // Other ERC721 functions (mint, transfer, etc)
 });
