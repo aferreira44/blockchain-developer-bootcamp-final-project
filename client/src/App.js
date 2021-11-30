@@ -53,7 +53,10 @@ const App = () => {
   return (
     <div className="App">
       <h1>Contract Deployer</h1>
-      <p>Here you can deploy and interact with your smart contract with just one click.</p>
+      <p>
+        Here you can deploy and interact with your smart contract with just one
+        click.
+      </p>
       {/*  Your account: */}
       <Alert variant="primary">
         Your account: <b>{accounts}</b>
@@ -289,7 +292,10 @@ const ERC20Interaction = (props) => {
 
   const transfer = async () => {
     instance.methods
-      .transfer(transferAddressTo, web3.utils.toWei(String(transferAmount)))
+      .transfer(
+        transferAddressTo,
+        web3.utils.toWei(new web3.BN(transferAmount))
+      )
       .send({ from: accounts[0] })
       .on("confirmation", () => {})
       .then((response) => {
@@ -302,7 +308,7 @@ const ERC20Interaction = (props) => {
 
   const mint = async () => {
     instance.methods
-      .mint(mintAccountTo, web3.utils.toWei(String(mintAmount)))
+      .mint(mintAccountTo, web3.utils.toWei(new web3.BN(mintAmount)))
       .send({ from: accounts[0] })
       .on("confirmation", () => {})
       .then((response) => {
